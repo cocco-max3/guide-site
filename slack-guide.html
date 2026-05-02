@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Slack 使い方ガイド</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1a1523;
+    --bg2: #231c2e;
+    --surface: #38304a;
+    --surface2: #42395a;
+    --surface3: #4e4468;
+    --ink: #ffffff;
+    --ink2: #e2d9f3;
+    --ink3: #b8aad4;
+    --ink4: #7a6e94;
+    --accent: #e8196b;
+    --accent2: #4a9eff;
+    --accent3: #36c97e;
+    --accent4: #f59e0b;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+
+    --cat-basic: #e8196b;
+    --cat-channel: #4a9eff;
+    --cat-msg: #36c97e;
+    --cat-notify: #f59e0b;
+    --cat-integrate: #a855f7;
+    --cat-adv: #f97316;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 10px; }
+
+  /* ── LAYOUT ── */
+  .shell { display: flex; min-height: 100vh; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 256px;
+    flex-shrink: 0;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .logo-area {
+    padding: 24px 20px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-mark {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #e8196b, #a855f7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 16px rgba(232,25,107,0.35);
+  }
+
+  .logo-text { }
+  .logo-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--ink);
+    letter-spacing: -0.3px;
+    line-height: 1;
+  }
+
+  .logo-sub {
+    font-size: 10px;
+    color: var(--ink3);
+    margin-top: 2px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+  }
+
+  .search-wrap { padding: 14px 14px 8px; }
+
+  .search-input {
+    width: 100%;
+    padding: 9px 12px 9px 34px;
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    background: var(--surface);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    outline: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' viewBox='0 0 24 24' stroke='%238a7aa8' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: 10px center;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .search-input::placeholder { color: var(--ink4); }
+  .search-input:focus { border-color: var(--accent2); background: var(--surface2); }
+
+  .nav-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
+    color: var(--ink3);
+    padding: 12px 18px 6px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 14px;
+    margin: 1px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13.5px;
+    color: var(--ink2);
+    transition: all 0.15s;
+    border: none;
+    background: none;
+    width: calc(100% - 16px);
+    text-align: left;
+  }
+
+  .nav-item:hover { background: var(--surface2); color: var(--ink); }
+
+  .nav-item.active {
+    background: var(--surface3);
+    color: var(--ink);
+  }
+
+  .nav-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+  }
+
+  .nav-item.active .nav-dot,
+  .nav-item:hover .nav-dot { transform: scale(1.3); }
+
+  .nav-badge {
+    margin-left: auto;
+    font-size: 10px;
+    background: var(--surface3);
+    border-radius: 10px;
+    padding: 1px 7px;
+    color: var(--ink3);
+  }
+
+  .nav-item.active .nav-badge { background: rgba(255,255,255,0.1); color: var(--ink2); }
+
+  .level-filter {
+    padding: 14px 16px;
+    border-top: 1px solid var(--border);
+    margin-top: auto;
+  }
+
+  .level-filter-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--ink3);
+    margin-bottom: 8px;
+  }
+
+  .level-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .level-pill {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    cursor: pointer;
+    border: 1px solid var(--border2);
+    background: none;
+    color: var(--ink3);
+    font-family: 'Noto Sans JP', sans-serif;
+    transition: all 0.15s;
+  }
+
+  .level-pill:hover { border-color: var(--ink3); color: var(--ink2); }
+  .level-pill.active { background: var(--ink); color: var(--bg); border-color: var(--ink); font-weight: 700; }
+
+  /* ── MAIN ── */
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 40px 48px;
+    max-width: 960px;
+  }
+
+  /* ── PAGE HEADER ── */
+  .page-header { margin-bottom: 36px; }
+
+  .page-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--ink3);
+    margin-bottom: 12px;
+  }
+
+  .page-eyebrow-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.85); }
+  }
+
+  .page-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 42px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #ff6eb0, #c084fc, #7dd3fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: inline-block;
+    line-height: 1.15;
+    letter-spacing: -1px;
+    margin-bottom: 14px;
+  }
+
+  .page-title span {
+    background: linear-gradient(135deg, #ff6eb0, #c084fc, #7dd3fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: inline-block;
+  }
+
+  .page-desc { color: var(--ink2); font-size: 14px; max-width: 560px; line-height: 1.8; }
+
+  /* ── CARDS ── */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    margin-top: 4px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 14px;
+    padding: 22px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16,1,0.3,1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.2s;
+    border-radius: 14px;
+  }
+
+  .card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255,255,255,0.28);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+  }
+
+  .card:hover::before { opacity: 1; }
+
+  .card-corner {
+    position: absolute;
+    top: 0; right: 0;
+    width: 56px; height: 56px;
+    border-radius: 0 14px 0 40px;
+    opacity: 0.25;
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 14px;
+  }
+
+  .card-icon-wrap {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .card-level {
+    font-size: 10px;
+    padding: 3px 9px;
+    border-radius: 10px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+
+  .level-beginner { background: rgba(54,201,126,0.25); color: #6ee7b7; }
+  .level-intermediate { background: rgba(74,158,255,0.25); color: #93c5fd; }
+  .level-advanced { background: rgba(232,25,107,0.25); color: #fca5a5; }
+
+  .card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+
+  .card-desc { font-size: 12.5px; color: var(--ink2); line-height: 1.7; }
+
+  .card-arrow {
+    position: absolute;
+    bottom: 16px;
+    right: 18px;
+    font-size: 16px;
+    color: var(--ink3);
+    transition: all 0.2s;
+    opacity: 0;
+  }
+
+  .card:hover .card-arrow { opacity: 1; transform: translateX(3px); }
+
+  /* ── SECTION DIVIDER ── */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 36px 0 18px;
+  }
+
+  .divider-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .divider-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink2);
+    white-space: nowrap;
+  }
+
+  .divider-line { flex: 1; height: 1px; background: var(--border); }
+
+  /* ── DETAIL OVERLAY ── */
+  .detail-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,8,16,0.7);
+    z-index: 100;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.2s;
+  }
+
+  .detail-overlay.open { display: flex; align-items: flex-start; justify-content: flex-end; }
+
+  .detail-panel {
+    width: 540px;
+    max-width: 95vw;
+    height: 100vh;
+    background: var(--bg2);
+    border-left: 1px solid var(--border2);
+    overflow-y: auto;
+    animation: slideIn 0.28s cubic-bezier(0.16,1,0.3,1);
+    padding: 32px 36px;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+  .detail-close {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 7px 14px;
+    cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 12px;
+    color: var(--ink3);
+    margin-bottom: 26px;
+    transition: all 0.15s;
+  }
+
+  .detail-close:hover { background: var(--surface2); color: var(--ink2); }
+
+  .detail-header { margin-bottom: 24px; }
+
+  .detail-cat-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+  }
+
+  .detail-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--ink);
+    line-height: 1.3;
+    margin-bottom: 10px;
+    letter-spacing: -0.5px;
+  }
+
+  .detail-lead {
+    color: var(--ink2);
+    font-size: 13.5px;
+    line-height: 1.8;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+
+  .detail-section { margin-bottom: 28px; }
+
+  .detail-section-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--ink3);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .detail-section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* STEPS */
+  .steps-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+
+  .step-item {
+    display: flex;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--surface);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    transition: border-color 0.15s;
+  }
+
+  .step-item:hover { border-color: var(--border2); }
+
+  .step-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    background: var(--surface3);
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: var(--ink2);
+  }
+
+  .step-content { flex: 1; }
+  .step-title { font-size: 13.5px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+  .step-desc { font-size: 12.5px; color: var(--ink2); line-height: 1.7; }
+
+  /* TIP */
+  .tip-box {
+    background: var(--surface);
+    border: 1px solid rgba(74,158,255,0.25);
+    border-left: 3px solid var(--accent2);
+    border-radius: 0 10px 10px 0;
+    padding: 14px 16px;
+    font-size: 13px;
+    color: var(--ink2);
+    line-height: 1.7;
+  }
+
+  .tip-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 6px;
+  }
+
+  /* SHORTCUTS */
+  .shortcut-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  .shortcut-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .shortcut-key {
+    font-size: 11.5px;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    color: var(--ink);
+    background: var(--surface3);
+    border-radius: 5px;
+    padding: 3px 8px;
+    display: inline-block;
+    letter-spacing: 0.3px;
+  }
+
+  .shortcut-desc { font-size: 11.5px; color: var(--ink3); }
+
+  /* EXAMPLE CHAT */
+  .chat-example {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .chat-msg { display: flex; gap: 10px; }
+
+  .chat-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  .chat-bubble { flex: 1; }
+  .chat-name { font-size: 11px; font-weight: 700; color: var(--ink); margin-bottom: 3px; }
+  .chat-name span { font-size: 10px; font-weight: 400; color: var(--ink4); margin-left: 6px; }
+  .chat-text { font-size: 12.5px; color: var(--ink2); line-height: 1.6; }
+  .chat-reaction { display: inline-flex; align-items: center; gap: 4px; background: var(--surface3); border-radius: 12px; padding: 2px 8px; font-size: 12px; margin-top: 6px; }
+
+  /* EMPTY */
+  .empty-state { text-align: center; padding: 80px 20px; color: var(--ink3); }
+  .empty-icon { font-size: 42px; margin-bottom: 16px; filter: grayscale(0.5); }
+  .empty-text { font-size: 14px; }
+
+  /* RESPONSIVE */
+  @media (max-width: 700px) {
+    .sidebar { display: none; }
+    .main { padding: 20px 18px; }
+    .cards-grid { grid-template-columns: 1fr; }
+    .page-title { font-size: 28px; }
+    .mobile-nav {
+      display: flex !important;
+      overflow-x: auto;
+      gap: 8px;
+      padding: 10px 16px;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      scrollbar-width: none;
+    }
+    .mobile-nav::-webkit-scrollbar { display: none; }
+    .mobile-nav-item {
+      flex-shrink: 0;
+      padding: 7px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--border2);
+      font-size: 12.5px;
+      cursor: pointer;
+      background: none;
+      font-family: 'Noto Sans JP', sans-serif;
+      white-space: nowrap;
+      color: var(--ink2);
+    }
+    .mobile-nav-item.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  }
+
+  .mobile-nav { display: none; }
+
+  /* FADE IN ANIM */
+  .cards-grid { animation: cardsReveal 0.3s ease; }
+  @keyframes cardsReveal { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<div class="mobile-nav" id="mobileNav"></div>
+
+<div class="shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo-area">
+      <div class="logo-mark">💬</div>
+      <div class="logo-text">
+        <div class="logo-name">Slack Guide</div>
+        <div class="logo-sub">使い方リファレンス</div>
+      </div>
+    </div>
+
+    <div class="search-wrap">
+      <input class="search-input" type="search" placeholder="キーワードで検索…" id="searchInput">
+    </div>
+
+    <div class="nav-label">カテゴリー</div>
+    <nav id="navArea"></nav>
+
+    <div class="level-filter">
+      <div class="level-filter-label">レベル</div>
+      <div class="level-pills">
+        <button class="level-pill active" data-level="all">すべて</button>
+        <button class="level-pill" data-level="beginner">入門</button>
+        <button class="level-pill" data-level="intermediate">中級</button>
+        <button class="level-pill" data-level="advanced">上級</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="page-header">
+      <div class="page-eyebrow"><span class="page-eyebrow-dot"></span> リファレンスガイド</div>
+      <div class="page-title" id="pageTitle">Slack を<span>使いこなす</span></div>
+      <div class="page-desc" id="pageDesc">入門から上級まで、Slackのすべての機能をカテゴリー別に解説。気になる項目をクリックして詳細を確認してください。</div>
+    </div>
+    <div id="cardsArea"></div>
+  </main>
+</div>
+
+<!-- DETAIL OVERLAY -->
+<div class="detail-overlay" id="detailOverlay">
+  <div class="detail-panel" id="detailPanel"></div>
+</div>
+
+<script>
+// ── COLOR MAP ──────────────────────────────────────────────────────────
+const catColor = {
+  basic:     { dot: '#e8196b', icon: 'rgba(232,25,107,0.15)', tag: 'rgba(232,25,107,0.15)', tagInk: '#e8196b', corner: '#e8196b' },
+  channel:   { dot: '#4a9eff', icon: 'rgba(74,158,255,0.15)',  tag: 'rgba(74,158,255,0.15)',  tagInk: '#4a9eff', corner: '#4a9eff' },
+  message:   { dot: '#36c97e', icon: 'rgba(54,201,126,0.15)', tag: 'rgba(54,201,126,0.15)', tagInk: '#36c97e', corner: '#36c97e' },
+  notify:    { dot: '#f59e0b', icon: 'rgba(245,158,11,0.15)',  tag: 'rgba(245,158,11,0.15)',  tagInk: '#f59e0b', corner: '#f59e0b' },
+  integrate: { dot: '#a855f7', icon: 'rgba(168,85,247,0.15)', tag: 'rgba(168,85,247,0.15)', tagInk: '#a855f7', corner: '#a855f7' },
+  advanced:  { dot: '#f97316', icon: 'rgba(249,115,22,0.15)',  tag: 'rgba(249,115,22,0.15)',  tagInk: '#f97316', corner: '#f97316' },
+  notion:    { dot: '#06b6d4', icon: 'rgba(6,182,212,0.18)',   tag: 'rgba(6,182,212,0.18)',   tagInk: '#22d3ee', corner: '#06b6d4' },
+};
+
+// ── CATEGORIES ─────────────────────────────────────────────────────────
+const categories = [
+  { id: 'all',       label: 'すべて',        icon: '🗂️' },
+  { id: 'basic',     label: '基本操作',       icon: '🚀' },
+  { id: 'channel',   label: 'チャンネル',     icon: '#️⃣' },
+  { id: 'message',   label: 'メッセージ',     icon: '✉️' },
+  { id: 'notify',    label: '通知管理',       icon: '🔔' },
+  { id: 'integrate', label: '連携・アプリ',   icon: '⚡' },
+  { id: 'advanced',  label: '上級テクニック', icon: '🎯' },
+  { id: 'notion',    label: 'Notion連携',     icon: '🔗' },
+];
+
+// ── DATA ───────────────────────────────────────────────────────────────
+const items = [
+  // ── 基本操作 ──────────────────────────────────────────────────────
+  {
+    id: 'b1', category: 'basic', level: 'beginner', icon: '👋',
+    title: 'Slackを始める — 初期設定',
+    desc: 'アカウント作成からプロフィール設定、ワークスペースへの参加まで。',
+    lead: 'Slackを使い始める最初のステップ。ワークスペースに招待されたら、まずプロフィールを整えましょう。チームメンバーがあなたを識別しやすくなります。',
+    steps: [
+      { title: '招待メールからワークスペースに参加', desc: '受け取ったメールの「Join Now」ボタンをクリック。ブラウザまたはアプリが開きます。アプリ版のほうが通知など快適に使えます。' },
+      { title: 'プロフィールを設定する', desc: '右上のアイコン→「プロフィールを編集」から名前・アイコン・役職・連絡先を入力。顔写真を設定するとメンバーに覚えてもらいやすくなります。' },
+      { title: 'ステータスを設定する', desc: 'アイコン横の絵文字アイコンからステータスを設定。「会議中」「休暇中」など状態を共有すると、チームとのやり取りがスムーズになります。' },
+      { title: '言語・タイムゾーンを確認', desc: '設定→「言語とタイムゾーン」で正しいタイムゾーンが設定されているか確認。リモートチームではリマインダーの時刻がずれる原因になります。' },
+    ],
+    tip: 'プロフィールに「今日の集中タイム：10時〜12時はメッセージ見ません」など作業スタイルを書いておくと、不要な中断が減ります。',
+  },
+  {
+    id: 'b2', category: 'basic', level: 'beginner', icon: '🔍',
+    title: '画面の見方・基本操作',
+    desc: 'サイドバー・ホーム・DM・検索など、Slackのインターフェースを把握する。',
+    lead: 'Slackの画面構成を把握することで、情報を素早く見つけられるようになります。最初は迷子になりやすいので、まず地図を覚えましょう。',
+    steps: [
+      { title: '左サイドバーの構成を理解する', desc: '上から「ホーム（すべての会話）」「DM（ダイレクトメッセージ）」「アクティビティ（通知一覧）」。その下にチャンネルとDMのリストが並びます。' },
+      { title: 'ホームで全体を把握', desc: 'ホームタブには全チャンネルの未読メッセージがまとめて表示されます。ここを見れば重要な情報を見落としにくくなります。' },
+      { title: '検索を使いこなす', desc: '上部の検索バー（または Ctrl+K）でメッセージ・ファイル・チャンネルを横断検索。`in:#チャンネル名` や `from:@名前` で絞り込みができます。' },
+    ],
+    tip: 'キーボードショートカット `Ctrl+K`（Mac: ⌘+K）を覚えると、チャンネルやDMへの移動が格段に速くなります。',
+    shortcuts: [
+      { key: 'Ctrl+K', desc: 'クイック移動' },
+      { key: 'Ctrl+F', desc: '現チャンネル内検索' },
+      { key: 'Alt+↑↓', desc: '前後のチャンネルへ' },
+      { key: 'Ctrl+Shift+K', desc: 'DM一覧を開く' },
+    ],
+  },
+  {
+    id: 'b3', category: 'basic', level: 'beginner', icon: '📱',
+    title: 'モバイルアプリの使い方',
+    desc: 'スマホでSlackを快適に使うための設定と操作のコツ。',
+    lead: 'Slackはスマホでも全機能が使えます。移動中や外出先でもチームの動きをキャッチアップできます。ただし「常時接続」にならないよう通知管理も大切です。',
+    steps: [
+      { title: 'アプリをダウンロードしてログイン', desc: 'App Store / Google PlayでSlackをインストール。複数のワークスペースに参加している場合は、左端のワークスペースアイコンで切り替えます。' },
+      { title: 'プッシュ通知を設定する', desc: 'アプリ設定→「通知」から、どの種類の通知をプッシュで受け取るかを選択。すべてオンにすると疲弊するので最初は「メンションのみ」がおすすめです。' },
+      { title: '「おやすみモード」を活用', desc: 'スマホのアプリから通知スケジュールを設定すると、業務時間外の通知をオフにできます。仕事とプライベートのメリハリをつけましょう。' },
+    ],
+    tip: 'スマホでメッセージを長押しするとリアクション・返信・ピン留めなどのアクションメニューが表示されます。',
+  },
+
+  // ── チャンネル ─────────────────────────────────────────────────────
+  {
+    id: 'c1', category: 'channel', level: 'beginner', icon: '#️⃣',
+    title: 'チャンネルに参加・作成する',
+    desc: 'チャンネルの種類（パブリック・プライベート）と参加・作成の方法。',
+    lead: 'チャンネルはテーマ別の会話スペースです。プロジェクト・部署・話題ごとに分けることで、情報が整理され必要な人だけが集まれます。',
+    steps: [
+      { title: 'チャンネル一覧から参加', desc: 'サイドバーの「チャンネルを追加」または「+ チャンネル」から「チャンネルを閲覧する」を選択。パブリックチャンネルは一覧から自由に参加できます。' },
+      { title: '新しいチャンネルを作成', desc: '「+」→「チャンネルを作成」で新規作成。名前は `#proj-〇〇` `#team-〇〇` のようにプレフィックスをつけると整理しやすいです。' },
+      { title: 'パブリックとプライベートの使い分け', desc: 'パブリックは誰でも検索・参加できる。プライベートは招待制で機密情報向け。原則パブリックにしておくと情報の透明性が高まります。' },
+    ],
+    tip: 'チャンネル名の先頭に絵文字をつける（例: `📢-全体連絡`）と視覚的にわかりやすくなり、種類を直感的に区別できます。',
+    shortcuts: [
+      { key: 'Ctrl+Shift+L', desc: 'チャンネル一覧を開く' },
+      { key: 'Ctrl+J', desc: 'ジャンプ（チャンネル移動）' },
+    ],
+  },
+  {
+    id: 'c2', category: 'channel', level: 'intermediate', icon: '📌',
+    title: 'チャンネルを整理・管理する',
+    desc: 'セクション分け・スター・ミュートでサイドバーをすっきり管理する。',
+    lead: '参加チャンネルが増えると、サイドバーが見づらくなります。セクション分けとスター機能で、重要な情報が埋もれないように整理しましょう。',
+    steps: [
+      { title: 'サイドバーにセクションを作成', desc: '「チャンネル」セクションの「…」→「セクションを作成」で任意のグループを作れます。「📂 プロジェクト」「📢 アナウンス」など用途別に分けましょう。' },
+      { title: 'よく使うチャンネルをスター', desc: 'チャンネル名を右クリック（長押し）→「スターを付ける」でサイドバー上部に固定表示。毎日見るチャンネルは3〜5個に絞るのがおすすめです。' },
+      { title: '不要なチャンネルをミュート', desc: '情報は追いたいが通知は不要なチャンネルはミュートに設定。チャンネル名が薄く表示されるようになり、未読バッジも表示されなくなります。' },
+    ],
+    tip: 'チャンネルの「概要」欄に目的・ルール・関連リンクを記載しておくと、後から参加したメンバーのオンボーディングが楽になります。',
+  },
+  {
+    id: 'c3', category: 'channel', level: 'intermediate', icon: '🏗️',
+    title: 'チャンネル設計のベストプラクティス',
+    desc: 'チーム全体で情報が流れやすくなるチャンネル命名規則と構成の考え方。',
+    lead: 'チャンネルの設計はチームのコミュニケーション効率を左右します。「多すぎず・少なすぎず」のバランスを意識した設計が重要です。',
+    steps: [
+      { title: '命名規則を決める', desc: '`#announce-` = 全体通知、`#proj-` = プロジェクト、`#team-` = 部署、`#random-` = 雑談 など接頭辞を統一することで検索しやすくなります。' },
+      { title: '「お知らせ専用」チャンネルを分ける', desc: '投稿権限を管理者のみに制限した `#announcements` チャンネルを作成すると、重要な連絡が雑談に埋もれません。' },
+      { title: 'アーカイブのルールを設ける', desc: '完了したプロジェクトのチャンネルは適宜アーカイブ。アーカイブしても履歴は残るので情報は失われません。' },
+    ],
+    tip: '定期的（四半期ごとなど）にチャンネルを棚卸しして、不要なものをアーカイブする「チャンネル整理デー」を設けると組織全体の情報整理が進みます。',
+  },
+
+  // ── メッセージ ─────────────────────────────────────────────────────
+  {
+    id: 'm1', category: 'message', level: 'beginner', icon: '💬',
+    title: 'メッセージの基本 & 書式',
+    desc: '太字・コードブロック・リストなど、読みやすいメッセージを書くための書式。',
+    lead: 'Slackのメッセージには独自の書式（マークアップ）が使えます。適切に使うと情報が格段に伝わりやすくなります。',
+    steps: [
+      { title: '基本的な文字装飾', desc: '`*太字*`、`_イタリック_`、`~取り消し線~`、` `コード` `（バッククォートで囲む）が使えます。' },
+      { title: 'コードブロックを使う', desc: 'バッククォート3つ（` ``` `）で囲むとコードブロックになります。エラーメッセージやコードをそのまま共有するときに便利です。' },
+      { title: '箇条書きと番号リスト', desc: 'Shift+Enterで改行しながら `- ` または `1. ` で始めるとリストになります。手順を説明するときに活用しましょう。' },
+      { title: '「Shift+Enter」で改行', desc: 'Enterだけだとメッセージが送信されます。文章中で改行したいときは Shift+Enter を使います。' },
+    ],
+    tip: '長文を送る前に「このメッセージを3行以内に圧縮できないか？」を考えましょう。Slackは短いやりとりが積み重なる設計です。',
+    shortcuts: [
+      { key: 'Enter', desc: 'メッセージ送信' },
+      { key: 'Shift+Enter', desc: '改行（送信しない）' },
+      { key: 'Ctrl+B', desc: '太字' },
+      { key: 'Ctrl+I', desc: 'イタリック' },
+    ],
+  },
+  {
+    id: 'm2', category: 'message', level: 'beginner', icon: '🧵',
+    title: 'スレッドで返信する',
+    desc: 'チャンネルを散らかさずに議論できるスレッド機能の使い方。',
+    lead: 'スレッドはメッセージに対して「枝」として返信する機能です。1つのトピックの会話がスレッドにまとまることで、チャンネルがすっきり保てます。',
+    steps: [
+      { title: 'スレッドを開く', desc: 'メッセージにカーソルを乗せると右上にメニューが出ます。「スレッドで返信」（吹き出しアイコン）をクリックすると右サイドにスレッドパネルが開きます。' },
+      { title: 'スレッドに返信する', desc: 'スレッドパネルの入力欄からメッセージを送信。チャンネルには通知されますが、本文は流れません。' },
+      { title: 'チャンネルにも投稿する場合', desc: '入力欄下の「チャンネルにも投稿する」をチェックすると、スレッドの返信がチャンネル本流にも表示されます。重要な結論を共有するときに使います。' },
+    ],
+    tip: '「返信するか新規投稿するか」に迷ったら、既存のトピックへの返答はスレッド、新しい話題は新規投稿が基本です。',
+  },
+  {
+    id: 'm3', category: 'message', level: 'intermediate', icon: '😊',
+    title: 'リアクション & メンションを使う',
+    desc: '絵文字リアクションと @メンションで的確に反応・通知する方法。',
+    lead: '「了解しました」の代わりに ✅ リアクションを使うことで、不要なメッセージを減らせます。@メンションは使いすぎ注意です。',
+    steps: [
+      { title: 'リアクションを追加', desc: 'メッセージにカーソルを乗せ → 絵文字アイコン（😊）をクリック。よく使う絵文字を最初に選んでおくと入力が速くなります。' },
+      { title: 'カスタム絵文字を活用', desc: 'ワークスペース管理者が設定したカスタム絵文字（社内スタンプ）を活用すると、チームの文化が生まれます。`:emoji_name:` で呼び出せます。' },
+      { title: 'メンションを正しく使う', desc: '`@名前` で個人に、`@here` で現在オンラインの全員に、`@channel` でチャンネル全員に通知。`@channel` は本当に重要なときだけ使いましょう。' },
+    ],
+    tip: 'よく使うリアクションはホットキーに登録できます。`:white_check_mark:` や `:eyes:` などチームで意味を統一すると連絡のやりとりが激減します。',
+  },
+  {
+    id: 'm4', category: 'message', level: 'intermediate', icon: '📎',
+    title: 'ファイル共有とピン留め',
+    desc: 'ファイルをアップロード・共有し、重要な情報をピン留めして見つけやすくする。',
+    lead: 'Slackにファイルを直接アップロードすることで、会話の文脈とともにファイルを管理できます。重要なメッセージやファイルはピン留めして残しましょう。',
+    steps: [
+      { title: 'ファイルをアップロード', desc: '入力欄の「+」ボタンからファイルを選択するか、ドラッグ＆ドロップでアップロード。Google Drive・Dropboxなどと連携してリンクを貼ることもできます。' },
+      { title: 'メッセージをピン留めする', desc: 'メッセージの「…」→「ピン留め」でチャンネル上部のピン一覧に保存。告知・ルール・重要リンクなど常に参照したい情報をピンに留めましょう。' },
+      { title: 'チャンネルのピン一覧を見る', desc: 'チャンネル名をクリック→「ピン留め済みアイテム」でそのチャンネルの全ピンを確認できます。' },
+    ],
+    tip: 'ファイルの検索は上部の検索バーから `in:#チャンネル名` + ファイル名でできます。大量のファイルが流れても後から見つけられます。',
+  },
+
+  // ── 通知管理 ──────────────────────────────────────────────────────
+  {
+    id: 'n1', category: 'notify', level: 'beginner', icon: '🔕',
+    title: '通知設定をカスタマイズする',
+    desc: '必要な通知だけ受け取るために、通知の粒度を細かく設定する方法。',
+    lead: 'Slackの通知が多すぎて集中できないのは設定の問題です。「受け取りすぎ」も「見逃しすぎ」もよくないので、自分に合った粒度に調整しましょう。',
+    steps: [
+      { title: 'グローバル通知設定を変える', desc: '設定（⚙️）→「通知」でデスクトップ通知の基本設定を行います。「すべてのメッセージ」から「メンションとキーワードのみ」に変えるだけで激減します。' },
+      { title: 'キーワード通知を登録', desc: '通知設定の「キーワードとリアクション」欄に自分の名前・プロジェクト名・製品名などを入力すると、それを含む投稿が通知されます。' },
+      { title: 'チャンネルごとに通知を設定', desc: 'チャンネル名を右クリック→「通知を変更」でそのチャンネルだけの通知設定が上書きできます。重要チャンネルは「すべて」、雑談は「通知しない」など使い分けましょう。' },
+    ],
+    tip: '`/dnd 2時間` とメッセージを送ると2時間のおやすみモードを素早く設定できます。集中タイムに入るときに便利です。',
+    shortcuts: [
+      { key: 'Ctrl+Shift+Y', desc: 'おやすみモードの切り替え' },
+      { key: '/dnd', desc: 'おやすみモードを設定' },
+    ],
+  },
+  {
+    id: 'n2', category: 'notify', level: 'intermediate', icon: '📅',
+    title: 'リマインダーと後で見るを使う',
+    desc: 'メッセージやタスクを忘れないために、リマインダーを設定する。',
+    lead: '「後で対応しよう」と思って流れてしまうのはよくあること。リマインダー機能を使えば、Slack内でタスク管理の代わりができます。',
+    steps: [
+      { title: 'メッセージにリマインダーを設定', desc: 'メッセージの「…」→「後でリマインドする」から時間を選択。設定した時刻にSlackbotから通知が来ます。' },
+      { title: '「後で見る」にブックマーク', desc: 'メッセージの「…」→「後で見る」（ブックマークアイコン）でリスト保存。サイドバーの「後で見る」から一覧確認できます。' },
+      { title: 'スラッシュコマンドでリマインド', desc: '`/remind #チャンネル名 毎週月曜の朝9時に週次報告をお願いします` のように入力すると定期リマインダーを設定できます。' },
+    ],
+    tip: 'リマインダーはSlackbotが送ってくれるDMです。DM一覧に「Slackbot」があれば設定済みのリマインダーを確認・削除できます。',
+  },
+
+  // ── 連携・アプリ ───────────────────────────────────────────────────
+  {
+    id: 'i1', category: 'integrate', level: 'intermediate', icon: '🔗',
+    title: 'Google Drive / Calendar と連携する',
+    desc: 'GoogleのツールとSlackを接続して、ファイル共有・予定通知を自動化する。',
+    lead: 'Slackに外部サービスを連携すると、複数のツールを行き来する手間が大幅に減ります。Google Workspaceとの連携は特に効果的です。',
+    steps: [
+      { title: 'アプリディレクトリから追加', desc: 'Slack左サイドバーの「Apps」→「アプリを探す」でGoogle Driveを検索し「追加」。インストール後はGoogle Drive内のファイルをSlackから検索・共有できます。' },
+      { title: 'DriveリンクをSlackに貼る', desc: 'Google DriveのリンクをSlackに貼り付けると、自動的にファイル名・種類・最終更新が表示されます。権限も自動で確認・リクエストできます。' },
+      { title: 'Google Calendarの予定をSlackに通知', desc: 'Google Calendar連携を有効にすると、会議の15分前にSlackで通知が届きます。会議URLもそのまま表示されるので忘れにくくなります。' },
+    ],
+    tip: 'Google Driveのファイルを共有するとき、SlackのDMで直接ファイルを送るより、Driveリンクを貼るほうがバージョン管理の面で安全です。',
+  },
+  {
+    id: 'i2', category: 'integrate', level: 'intermediate', icon: '🤖',
+    title: 'Slack ボットとスラッシュコマンド',
+    desc: 'Slackbotとスラッシュコマンドを使って作業を自動化・効率化する。',
+    lead: '「/コマンド」から始まるスラッシュコマンドはSlack内でさまざまな操作を素早く実行できます。外部ボットを連携するとさらに強力になります。',
+    steps: [
+      { title: '基本のスラッシュコマンドを覚える', desc: '`/away`（離席中に設定）、`/status`（ステータス変更）、`/invite @名前`（チャンネルに招待）などの基本コマンドを押さえておきましょう。' },
+      { title: 'Slackbotの自動返信を設定', desc: 'ワークスペース設定→「Slackbotの返信をカスタマイズ」からキーワードへの自動返信を設定。「wifi」と入力したら「パスワードは〇〇です」と返す設定ができます。' },
+      { title: '外部ボットを追加する', desc: 'Jira・Asana・GithubなどのボットをSlackに追加すると、課題の更新やPRのマージをSlack上で通知・操作できます。' },
+    ],
+    tip: 'ChatGPT・ClaudeなどのAIをSlackに連携すると、Slack内でAIに質問できるようになります。チームの生産性が一気に上がります。',
+  },
+  {
+    id: 'i3', category: 'integrate', level: 'advanced', icon: '⚙️',
+    title: 'Workflow Builder で業務を自動化する',
+    desc: 'ノーコードで自動化ワークフローを作成し、定型業務をSlackから削減する。',
+    lead: 'Workflow Builderはプログラミング不要でSlack内の自動化ができる機能です。入社手続き・報告収集・承認フローなどを自動化できます。',
+    steps: [
+      { title: 'Workflow Builderを開く', desc: 'Slackメニュー →「ツール」→「Workflow Builder」からワークフロー一覧画面を開きます。新規作成ボタンからスタート。' },
+      { title: 'トリガーを選ぶ', desc: 'ワークフローを起動するきっかけを選びます。「特定のチャンネルへの投稿」「ショートカットを使ったとき」「毎朝9時」などのトリガーが選べます。' },
+      { title: 'ステップを追加する', desc: '「フォームを送信」「チャンネルにメッセージを送信」「担当者に通知」などのステップを並べてワークフローを完成させます。条件分岐も設定可能です。' },
+    ],
+    tip: '毎週の進捗報告フォームをWorkflowで自動送信し、回答をスプレッドシートに集積する仕組みを作ると、上司への報告がほぼ自動化できます。',
+  },
+
+  // ── 上級テクニック ─────────────────────────────────────────────────
+  {
+    id: 'a1', category: 'advanced', level: 'intermediate', icon: '🎨',
+    title: 'Huddle（ハドル）でライトな音声会話',
+    desc: '気軽に音声・ビデオ通話ができるHuddleの使い方と活用シーン。',
+    lead: 'HuddleはZoomほど重くなく、気軽に音声でのやり取りができるSlackの会話機能です。「ちょっと話せますか？」をSlack内で完結させましょう。',
+    steps: [
+      { title: 'Huddleを開始する', desc: 'チャンネルまたはDMの入力欄左下のイヤホンアイコンをクリックするとHuddleが開始されます。チャンネルのメンバー全員が参加できます。' },
+      { title: 'スレッドと組み合わせる', desc: 'Huddleで話した内容のサマリーをすぐにスレッドで投稿する習慣をつけると、参加できなかったメンバーへの情報共有が漏れません。' },
+      { title: '画面共有で資料を見せる', desc: 'Huddle中に画面共有ボタンから画面を共有できます。軽いレビューや確認作業ならZoomよりHuddleのほうが素早く終わります。' },
+    ],
+    tip: 'DM相手がオンライン中であれば「Huddleを開始」をクリックするだけで通話が始まります。テキストより話したほうが早い場面で積極的に活用しましょう。',
+  },
+  {
+    id: 'a2', category: 'advanced', level: 'advanced', icon: '🔐',
+    title: 'チャンネルアーカイブと権限管理',
+    desc: '管理者向け：ワークスペースの権限体系と情報セキュリティの設定。',
+    lead: 'チームが大きくなるほど情報管理の重要性が増します。適切な権限設定でセキュリティと利便性を両立させましょう。',
+    steps: [
+      { title: 'メンバーの権限レベルを理解する', desc: '「オーナー」→「管理者」→「メンバー」→「ゲスト」の4段階。ゲストは特定チャンネルのみアクセスできる制限ユーザーで、社外の方向けです。' },
+      { title: 'チャンネルをアーカイブする', desc: 'チャンネル設定→「チャンネルをアーカイブする」で非表示に。メッセージ履歴は保持されるため必要なら後から検索できます。' },
+      { title: 'エクスポートとデータ保持', desc: 'ビジネスプラン以上では全メッセージのエクスポートが可能。コンプライアンス要件に合わせてデータ保持ポリシーを設定しましょう。' },
+    ],
+    tip: '退職者のアカウントは「無効化」するだけでなく、そのメンバーが管理していたチャンネルの引き継ぎも忘れずに確認しましょう。',
+  },
+  {
+    id: 'a3', category: 'advanced', level: 'advanced', icon: '🚀',
+    title: 'Slackをナレッジベースとして活用',
+    desc: 'Slackのキャンバス・ブックマーク・ピン留めでナレッジを蓄積・共有する。',
+    lead: 'Slackは会話ツールだけでなく、チームのナレッジを蓄積するハブとしても使えます。流れがちな情報を構造化して残しましょう。',
+    steps: [
+      { title: 'チャンネルにキャンバスを追加', desc: 'チャンネル名の右「▼」→「キャンバスを編集」でチャンネル専用のWikiページが作れます。ルール・FAQ・重要情報を記載しておきましょう。' },
+      { title: 'ブックマークバーにリンクを追加', desc: 'チャンネル上部のブックマークバーに重要なリンク（ドキュメント・スプレッドシート・ダッシュボード）を追加しておくと、メンバーが迷いません。' },
+      { title: 'メッセージをNotionや外部ツールに保存', desc: 'Slack連携ツール（Zapier・Makeなど）を使うと、特定のリアクション（📌など）がついたメッセージを自動的にNotionやスプレッドシートに保存できます。' },
+    ],
+    tip: 'チャンネルキャンバスに「このチャンネルの使い方」「よくある質問」を書いておくと、新メンバーのオンボーディングがスムーズになります。',
+  },
+  // ── Notion連携 ────────────────────────────────────────────────────
+  {
+    id: 'no1', category: 'notion', level: 'beginner', icon: '🔌',
+    title: 'Notion連携アプリを導入する',
+    desc: 'SlackとNotionを接続して、2つのツールをシームレスに使い始める最初の設定。',
+    lead: 'SlackとNotionを連携すると、Slack上でNotionのページを検索・プレビューしたり、会話からNotionページを直接作成したりできます。まず連携アプリのインストールから始めましょう。',
+    steps: [
+      { title: 'SlackアプリディレクトリからNotionを追加', desc: 'Slackの左サイドバー「Apps」→「アプリを探す」で「Notion」を検索し「追加」をクリック。ブラウザが開きNotionのOAuth認証画面に進みます。' },
+      { title: 'NotionワークスペースとSlackを接続', desc: 'Notion側で連携を許可するワークスペースを選択し「アクセスを許可する」をクリック。複数のNotionワークスペースがある場合は用途に合わせて選択します。' },
+      { title: '連携を確認する', desc: 'SlackのDMに「Notion」ボットが追加されれば連携完了。ボットに「help」と送ると使えるコマンド一覧が表示されます。' },
+    ],
+    tip: '連携後、SlackにNotionのリンクを貼り付けるだけで自動的にページタイトル・アイコン・更新日時のプレビューが表示されるようになります。',
+  },
+  {
+    id: 'no2', category: 'notion', level: 'beginner', icon: '🔍',
+    title: 'SlackからNotionページを検索・共有する',
+    desc: 'Slackを離れずにNotionのページを検索して、チームに素早く共有する方法。',
+    lead: '「あのNotionページどこだっけ？」をSlack上で解決できます。Notionアプリのスラッシュコマンドでページを検索し、そのままチャンネルに共有しましょう。',
+    steps: [
+      { title: '「/notion」コマンドで検索', desc: 'メッセージ入力欄に「/notion」と入力するとNotionページ検索パネルが開きます。キーワードを入力して目的のページを探せます。' },
+      { title: 'ページをチャンネルに共有', desc: '検索結果から共有したいページを選択し「シェア」をクリック。現在のチャンネルにNotionページのプレビューカードが投稿されます。' },
+      { title: 'URLを貼るだけでプレビュー表示', desc: 'NotionのページURLをSlackに貼り付けるだけでも自動プレビューが表示されます。スラッシュコマンドなしで手軽に共有できます。' },
+    ],
+    tip: 'Notionページを共有するとき、URLをそのまま貼るより「/notion」で検索して共有する方が、ページのアイコン・説明文まで表示されて伝わりやすいです。',
+  },
+  {
+    id: 'no3', category: 'notion', level: 'intermediate', icon: '📝',
+    title: 'Slackの会話からNotionページを作成する',
+    desc: 'Slackでの議論をそのままNotionのページやデータベースアイテムに変換する。',
+    lead: 'Slackで決まった内容をNotionに転記する手間をなくせます。メッセージのアクションメニューから直接Notionにページを作成することで、情報の二重管理を防ぎます。',
+    steps: [
+      { title: 'メッセージのアクションメニューを開く', desc: '保存したいメッセージにカーソルを乗せ「…（その他のアクション）」→「Notionにページを作成」を選択します。' },
+      { title: '保存先のNotionページを選択', desc: 'どのNotionページ（またはデータベース）に保存するかを選びます。よく使うページはお気に入り登録しておくと素早くアクセスできます。' },
+      { title: 'タイトル・内容を編集して保存', desc: 'Slackのメッセージ内容が自動で本文に入ります。タイトルを入力して「ページを作成」をクリックすれば完了。作成後すぐにNotionで編集できます。' },
+    ],
+    tip: '会議メモ・決定事項・タスクリストなど、チャットで流れてしまいがちな重要情報をNotionにワンクリックで保存する習慣をつけましょう。',
+  },
+  {
+    id: 'no4', category: 'notion', level: 'intermediate', icon: '🔔',
+    title: 'Notionの更新をSlackに通知する',
+    desc: 'Notionページやデータベースの変更をSlackチャンネルにリアルタイム通知する設定。',
+    lead: 'Notionで重要なページが更新されてもSlackをチェックしていれば見逃しません。プロジェクトのステータス変更や議事録の更新を自動通知する設定をしましょう。',
+    steps: [
+      { title: 'Notionページの「…」→「コネクト先」を開く', desc: '通知したいNotionページの右上「…」→「コネクト先を追加」からSlackを選択します。ページ単位で通知先チャンネルを設定できます。' },
+      { title: '通知先のSlackチャンネルを選択', desc: '連携済みのSlackワークスペースから通知を送りたいチャンネルを選びます。プロジェクトごとに専用チャンネルに通知するのがおすすめです。' },
+      { title: '通知のトリガーを設定', desc: '「ページが編集されたとき」「コメントが追加されたとき」「データベースのステータスが変わったとき」など通知タイミングを選択します。' },
+    ],
+    tip: 'データベースのステータスが「完了」に変わったらSlackに自動通知する設定が特に効果的。進捗確認のための確認メッセージが不要になります。',
+  },
+  {
+    id: 'no5', category: 'notion', level: 'intermediate', icon: '⚡',
+    title: 'Zapier / Make でSlack×Notionを自動化する',
+    desc: 'ノーコード自動化ツールを使ってSlackとNotionの連携をカスタマイズする。',
+    lead: 'ZapierやMakeを使うと、公式連携ではできない高度な自動化が実現できます。「特定のリアクションがついたSlackメッセージをNotionに保存」など、独自のワークフローが作れます。',
+    steps: [
+      { title: 'Zapierアカウントを作成してZapを作る', desc: 'zapier.com でアカウント登録後「＋ Create Zap」をクリック。トリガー（起点）にSlackを、アクション（実行内容）にNotionを選択します。' },
+      { title: 'トリガーを設定する', desc: '例：「特定の絵文字リアクション（📌）がついたメッセージ」をトリガーに設定。チャンネル・絵文字の種類などの条件を絞り込みます。' },
+      { title: 'Notionへの保存アクションを設定', desc: '保存先のNotionデータベースを選択し、Slackのメッセージ内容・投稿者・日時などをNotionのプロパティにマッピング。「テスト」で動作確認してZapを公開します。' },
+    ],
+    tip: '「📌リアクション → Notionのタスクデータベースに自動追加」の仕組みを作ると、Slackで出た作業依頼を漏れなくNotionで管理できます。Makeは無料プランでも月1,000回まで実行できます。',
+  },
+  {
+    id: 'no6', category: 'notion', level: 'advanced', icon: '🤖',
+    title: 'Slack × Notion × AIで議事録を自動生成する',
+    desc: 'Slack HuddleやZoomの会議内容をAIで要約してNotionに自動保存するワークフロー。',
+    lead: '会議の議事録作成は時間がかかる割に後回しにされがちです。SlackとNotionをAIツールと組み合わせることで、会議後ほぼ自動で構造化された議事録をNotionに残せます。',
+    steps: [
+      { title: 'Slack Huddle / 音声をテキスト化する', desc: 'Slack HuddleはNotionAIまたはOtter.aiと連携してトランスクリプト（文字起こし）を生成できます。ZoomはSlack連携で会議終了後に自動でチャンネルに文字起こしを投稿する設定が可能です。' },
+      { title: 'Notion AIで要約・構造化', desc: 'テキスト化した内容をNotionページに貼り付け、Notion AIの「要約」機能を使うと決定事項・アクションアイテム・議論内容の3構成に自動整理されます。' },
+      { title: 'Slackに完成した議事録を自動通知', desc: 'Zapier / Makeで「Notionにページが作成されたらSlackの#議事録チャンネルに自動投稿」の自動化を設定。参加者全員に議事録URLが届きます。' },
+    ],
+    tip: 'このワークフローが完成すると「会議 → 議事録作成 → Slack共有」が全自動になります。初期設定に1〜2時間かかりますが、以後の工数ゼロになるので費用対効果は抜群です。',
+  },
+];
+
+// ── RENDER NAV ──────────────────────────────────────────────────────
+function renderNav() {
+  const navArea = document.getElementById('navArea');
+  const mobileNav = document.getElementById('mobileNav');
+  const counts = {};
+  items.forEach(item => { counts[item.category] = (counts[item.category] || 0) + 1; });
+
+  navArea.innerHTML = categories.map(cat => {
+    const count = cat.id === 'all' ? items.length : (counts[cat.id] || 0);
+    const col = catColor[cat.id];
+    const dotStyle = col ? `background:${col.dot}` : 'background:#666';
+    return `
+      <button class="nav-item ${state.category === cat.id ? 'active' : ''}" onclick="setCategory('${cat.id}')">
+        <span class="nav-dot" style="${dotStyle}"></span>
+        ${cat.label}
+        <span class="nav-badge">${count}</span>
+      </button>`;
+  }).join('');
+
+  mobileNav.innerHTML = categories.map(cat =>
+    `<button class="mobile-nav-item ${state.category === cat.id ? 'active' : ''}" onclick="setCategory('${cat.id}')">${cat.icon} ${cat.label}</button>`
+  ).join('');
+}
+
+// ── RENDER CARDS ─────────────────────────────────────────────────────
+const levelLabel = { beginner: '入門', intermediate: '中級', advanced: '上級' };
+
+function renderCards() {
+  const area = document.getElementById('cardsArea');
+  const filtered = items.filter(item => {
+    const catOk = state.category === 'all' || item.category === state.category;
+    const lvlOk = state.level === 'all' || item.level === state.level;
+    const q = state.search;
+    const searchOk = !q || item.title.includes(q) || item.desc.includes(q);
+    return catOk && lvlOk && searchOk;
+  });
+
+  if (filtered.length === 0) {
+    area.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">該当する項目が見つかりませんでした。</div></div>`;
+    return;
+  }
+
+  if (state.category === 'all' && !state.search) {
+    const groups = {};
+    filtered.forEach(item => { (groups[item.category] = groups[item.category] || []).push(item); });
+    area.innerHTML = categories.filter(c => c.id !== 'all' && groups[c.id]).map(cat => {
+      const col = catColor[cat.id];
+      return `
+        <div class="section-divider">
+          <div class="divider-icon" style="background:${col?.icon || 'rgba(255,255,255,0.1)'}">${cat.icon}</div>
+          <span class="divider-label" style="color:${col?.dot || '#fff'}">${cat.label}</span>
+          <span class="divider-line"></span>
+        </div>
+        <div class="cards-grid">${groups[cat.id].map(cardHTML).join('')}</div>`;
+    }).join('');
+  } else {
+    area.innerHTML = `<div class="cards-grid">${filtered.map(cardHTML).join('')}</div>`;
+  }
+
+  // update header
+  const cat = categories.find(c => c.id === state.category);
+  const col = catColor[state.category];
+  document.getElementById('pageTitle').innerHTML = state.search
+    ? `「${state.search}」<span>の検索結果</span>`
+    : state.category === 'all'
+      ? `<span>Slack を使いこなす</span>`
+      : `<span>${cat.label}</span>`;
+  document.getElementById('pageDesc').textContent = state.search
+    ? `${filtered.length}件ヒットしました。`
+    : getCatDesc(state.category);
+}
+
+function getCatDesc(id) {
+  return ({
+    all: '入門から上級まで、Slackのすべての機能をカテゴリー別に解説しています。',
+    basic: 'アカウント設定・画面の見方・モバイル操作など、Slackを使い始めるための基本操作を解説します。',
+    channel: 'チャンネルの作成・参加・整理・設計方針まで、Slackの情報構造の核となる部分を学びます。',
+    message: 'メッセージ書式・スレッド・リアクション・ファイル共有など、日常的なやり取りを快適にするテクニック。',
+    notify: '通知の設定カスタマイズとリマインダーで、情報過多を防ぎながら重要な情報を逃さない方法を解説します。',
+    integrate: 'Google WorkspaceやAIツールとの連携、Workflow Builderを使った業務自動化を解説します。',
+    advanced: 'Huddle・権限管理・ナレッジベース活用など、Slackをさらに深く活用する上級テクニックを紹介します。',
+    notion:   'Notionアプリ導入・ページ共有・更新通知・Zapier自動化・AI議事録生成まで、Slack×Notion連携を全レベルで解説します。',
+  })[id] || '';
+}
+
+function cardHTML(item) {
+  const col = catColor[item.category] || {};
+  return `
+    <div class="card" onclick="openDetail('${item.id}')">
+      <div class="card-corner" style="background:${col.corner || '#fff'}"></div>
+      <div class="card-header">
+        <div class="card-icon-wrap" style="background:${col.icon || 'rgba(255,255,255,0.1)'}">${item.icon}</div>
+        <span class="card-level level-${item.level}">${levelLabel[item.level]}</span>
+      </div>
+      <div class="card-title">${item.title}</div>
+      <div class="card-desc">${item.desc}</div>
+      <div class="card-arrow">→</div>
+    </div>`;
+}
+
+// ── DETAIL ───────────────────────────────────────────────────────────
+function openDetail(id) {
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  const col = catColor[item.category] || {};
+  const cat = categories.find(c => c.id === item.category);
+
+  let html = `
+    <button class="detail-close" onclick="closeDetail()">← 戻る</button>
+    <div class="detail-header">
+      <div class="detail-cat-tag" style="background:${col.tag || 'rgba(255,255,255,0.1)'}; color:${col.tagInk || '#fff'}">${cat?.icon || ''} ${cat?.label || ''}</div>
+      <div class="detail-title">${item.icon} ${item.title}</div>
+    </div>
+    <div class="detail-lead">${item.lead || ''}</div>`;
+
+  if (item.steps?.length) {
+    html += `<div class="detail-section">
+      <div class="detail-section-title">手順</div>
+      <ul class="steps-list">
+        ${item.steps.map((s, i) => `
+          <li class="step-item">
+            <div class="step-num">${i + 1}</div>
+            <div class="step-content">
+              <div class="step-title">${s.title}</div>
+              <div class="step-desc">${s.desc}</div>
+            </div>
+          </li>`).join('')}
+      </ul></div>`;
+  }
+
+  if (item.tip) {
+    html += `<div class="detail-section">
+      <div class="tip-box"><div class="tip-label">💡 実践ヒント</div>${item.tip}</div>
+    </div>`;
+  }
+
+  if (item.shortcuts?.length) {
+    html += `<div class="detail-section">
+      <div class="detail-section-title">ショートカット</div>
+      <div class="shortcut-grid">
+        ${item.shortcuts.map(s => `
+          <div class="shortcut-item">
+            <span class="shortcut-key">${s.key}</span>
+            <span class="shortcut-desc">${s.desc}</span>
+          </div>`).join('')}
+      </div></div>`;
+  }
+
+  document.getElementById('detailPanel').innerHTML = html;
+  document.getElementById('detailOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDetail() {
+  document.getElementById('detailOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('detailOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeDetail();
+});
+
+// ── STATE & CONTROLS ─────────────────────────────────────────────────
+const state = { category: 'all', level: 'all', search: '' };
+
+function setCategory(id) {
+  state.category = id;
+  renderNav();
+  renderCards();
+}
+
+document.querySelectorAll('.level-pill').forEach(pill => {
+  pill.addEventListener('click', function() {
+    document.querySelectorAll('.level-pill').forEach(p => p.classList.remove('active'));
+    this.classList.add('active');
+    state.level = this.dataset.level;
+    renderCards();
+  });
+});
+
+let timer;
+document.getElementById('searchInput').addEventListener('input', function() {
+  clearTimeout(timer);
+  timer = setTimeout(() => { state.search = this.value.trim(); renderCards(); }, 200);
+});
+
+// ── INIT ─────────────────────────────────────────────────────────────
+renderNav();
+renderCards();
+</script>
+</body>
+</html>

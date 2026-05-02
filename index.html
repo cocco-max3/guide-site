@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ツール使い方ガイド</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #f5f5f5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+  p.sub {
+    color: #666;
+    font-size: 0.95rem;
+    margin-bottom: 3rem;
+    text-align: center;
+  }
+  .cards {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    width: 280px;
+    text-decoration: none;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.14);
+  }
+  .card .icon {
+    font-size: 3rem;
+  }
+  .card .name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1a1a2e;
+  }
+  .card .desc {
+    font-size: 0.85rem;
+    color: #888;
+    text-align: center;
+    line-height: 1.6;
+  }
+  .card.slack { border-top: 4px solid #e8196b; }
+  .card.notion { border-top: 4px solid #d4560a; }
+</style>
+</head>
+<body>
+  <h1>ツール使い方ガイド</h1>
+  <p class="sub">Slack / Notion の使い方をわかりやすく解説します</p>
+  <div class="cards">
+    <a href="./slack-guide.html" class="card slack">
+      <div class="icon">💬</div>
+      <div class="name">Slack ガイド</div>
+      <div class="desc">チャンネル・DM・通知設定など<br>Slack の基本から応用まで</div>
+    </a>
+    <a href="./notion-guide.html" class="card notion">
+      <div class="icon">📝</div>
+      <div class="name">Notion ガイド</div>
+      <div class="desc">ページ作成・データベース・<br>チーム活用まで丁寧に解説</div>
+    </a>
+  </div>
+</body>
+</html>
